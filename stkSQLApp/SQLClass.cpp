@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "SQLClass.h"
 
+// Treat this namespace as own. 
+using namespace SQLDB;
+
 SQLClass::SQLClass() : m_SuccessfullyConnected(false), m_Connection(0)
 {
 }
@@ -121,7 +124,7 @@ void SQLClass::AddEmployee(const Employee& a_Employee)
     pstmt->setString(3, a_Employee.starting_date);
     pstmt->setInt(4, a_Employee.salary);
     pstmt->setInt(5, a_Employee.vacation_days);
-    pstmt->setInt(6, a_Employee.position);
+    pstmt->setInt(6, to_underlying(a_Employee.position));
     pstmt->setInt(7, a_Employee.companyid);
     pstmt->setInt(8, a_Employee.officeid);
     pstmt->setInt(9, a_Employee.bossid);
@@ -441,7 +444,7 @@ void SQLClass::UpdateEmployee(const Employee& a_Employee)
     pstmt->setString(3, a_Employee.starting_date);
     pstmt->setInt(4, a_Employee.salary);
     pstmt->setInt(5, a_Employee.vacation_days);
-    pstmt->setInt(6, a_Employee.position);
+    pstmt->setInt(6, to_underlying(a_Employee.position));
     pstmt->setInt(7, a_Employee.companyid);
     pstmt->setInt(8, a_Employee.officeid);
     pstmt->setInt(9, a_Employee.bossid);

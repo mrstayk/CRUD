@@ -8,11 +8,14 @@
 #define new DEBUG_NEW
 #endif
 
+// C++20 feature.
+using enum SQLDB::EmployeePos;
+
 stkSQLAppDlg::stkSQLAppDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_STKSQLAPP_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
-	m_Showing = ListContent::NONE;
+	m_Showing = ListShowing::NONE;
 }
 
 void stkSQLAppDlg::DoDataExchange(CDataExchange* pDX)
@@ -129,13 +132,13 @@ HCURSOR stkSQLAppDlg::OnQueryDragIcon()
 void stkSQLAppDlg::PopulateList()
 {
 	switch (m_Showing) {
-		case ListContent::COMPANIES: {
+		case ListShowing::COMPANIES: {
 			PopulateCompanies();
 		} break;
-		case ListContent::EMPLOYEES: {
+		case ListShowing::EMPLOYEES: {
 			PopulateEmployees();
 		} break;
-		case ListContent::OFFICES: {
+		case ListShowing::OFFICES: {
 			PopulateOffices();
 		} break;
 		default: break;
@@ -144,7 +147,7 @@ void stkSQLAppDlg::PopulateList()
 
 void stkSQLAppDlg::ResetList() 
 {
-	m_Showing = ListContent::NONE;
+	m_Showing = ListShowing::NONE;
 	m_ListCtrl.DeleteAllItems();
 
 	int column_count = m_ListCtrl.GetHeaderCtrl()->GetItemCount();
@@ -159,7 +162,7 @@ void stkSQLAppDlg::ResetList()
 
 void stkSQLAppDlg::RePopulateList()
 {
-	ListContent::ListContents m_ShowingCurrent = m_Showing;
+	ListShowing m_ShowingCurrent = m_Showing;
 	ResetList();
 	m_Showing = m_ShowingCurrent;
 	PopulateList();
@@ -185,7 +188,7 @@ void stkSQLAppDlg::OnBnClickedAddCompany()
 
 	m_SQLConnector.AddCompany(company);
 
-	m_Showing = ListContent::COMPANIES;
+	m_Showing = ListShowing::COMPANIES;
 	RePopulateList();
 }
 
@@ -232,7 +235,7 @@ void stkSQLAppDlg::OnBnClickedButtonAddEmployee()
 	employee.starting_date = std::string(CStringA(starting_date));
 	employee.salary = std::stoi(std::string(CStringA(salary)));
 	employee.vacation_days = std::stoi(std::string(CStringA(vacation_days)));
-	employee.position = (EmployeePos)std::stoi(std::string(CStringA(position)));
+	employee.position = (SQLDB::EmployeePos)std::stoi(std::string(CStringA(position)));
 
 	employee.companyid = std::stoi(std::string(CStringA(companyid)));
 	employee.officeid = std::stoi(std::string(CStringA(officeid)));
@@ -240,7 +243,7 @@ void stkSQLAppDlg::OnBnClickedButtonAddEmployee()
 	
 	m_SQLConnector.AddEmployee(employee);
 
-	m_Showing = ListContent::EMPLOYEES;
+	m_Showing = ListShowing::EMPLOYEES;
 	RePopulateList();
 }
 
@@ -281,25 +284,25 @@ void stkSQLAppDlg::OnBnClickedButtonAddOffice()
 
 	m_SQLConnector.AddOffice(office);
 
-	m_Showing = ListContent::OFFICES;
+	m_Showing = ListShowing::OFFICES;
 	RePopulateList();
 }
 
 void stkSQLAppDlg::OnBnClickedShowCompanies()
 {
-	m_Showing = ListContent::COMPANIES;
+	m_Showing = ListShowing::COMPANIES;
 	RePopulateList();
 }
 
 void stkSQLAppDlg::OnBnClickedButtonShowEmployees()
 {
-	m_Showing = ListContent::EMPLOYEES;
+	m_Showing = ListShowing::EMPLOYEES;
 	RePopulateList();
 }
 
 void stkSQLAppDlg::OnBnClickedButtonShowOffices() 
 {
-	m_Showing = ListContent::OFFICES;
+	m_Showing = ListShowing::OFFICES;
 	RePopulateList();
 }
 
@@ -309,9 +312,9 @@ void stkSQLAppDlg::PopulateCompanies()
 
 	auto companies = m_SQLConnector.QueryCompanies();
 
-	m_ListCtrl.InsertColumn(ListContent::COMPANYID, _T("ID"), LVCFMT_LEFT, 100); 
-	m_ListCtrl.InsertColumn(ListContent::NAME, _T("Name"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::DATE, _T("Creation Date"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsCompanies::ID), _T("ID"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsCompanies::NAME), _T("Name"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsCompanies::DATE), _T("Creation Date"), LVCFMT_LEFT, 100);
 
 	int listIndex = 0;
 	for (auto company : companies) {
@@ -350,16 +353,16 @@ void stkSQLAppDlg::PopulateEmployees()
 
 	auto employees = m_SQLConnector.QueryEmployees();
 
-	m_ListCtrl.InsertColumn(ListContent::EMPLOYEEID, _T("ID"), LVCFMT_LEFT, 100); 
-	m_ListCtrl.InsertColumn(ListContent::FIRSTNAME, _T("First Name"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::LASTNAME, _T("Last Name"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::STARTINGDATE, _T("Starting Date"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::SALARY, _T("Salary"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::VACATIONDAYS, _T("Vacation Days"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::POSITION, _T("Position"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::EFKCOMPANYID, _T("Company ID"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::EFKOFFICEID, _T("Office ID"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::EFKBOSSID, _T("Boss ID"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsEmployees::ID), _T("ID"), LVCFMT_LEFT, 100); 
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsEmployees::FIRSTNAME), _T("First Name"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsEmployees::LASTNAME), _T("Last Name"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsEmployees::STARTINGDATE), _T("Starting Date"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsEmployees::SALARY), _T("Salary"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsEmployees::VACATIONDAYS), _T("Vacation Days"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsEmployees::POSITION), _T("Position"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsEmployees::FKCOMPANYID), _T("Company ID"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsEmployees::FKOFFICEID), _T("Office ID"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsEmployees::FKBOSSID), _T("Boss ID"), LVCFMT_LEFT, 100);
 
 	int listIndex = 0;
 	for (auto employee : employees) {
@@ -404,7 +407,7 @@ void stkSQLAppDlg::PopulateEmployee(Employee a_Employee, int a_ListIndex)
 	lvi.pszText = vacation_days.GetBuffer(0); 
 	m_ListCtrl.SetItem(&lvi);
 
-	CString position(a_Employee.position == HEAD_CHIEF ? "Head Chief" : (a_Employee.position == SPECIALIST ? "Specialist" : "Junior"));
+	CString position(a_Employee.position == HEADCHIEF ? "Head Chief" : (a_Employee.position == SPECIALIST ? "Specialist" : "Junior"));
 	lvi.iSubItem = 6;
 	lvi.pszText = position.GetBuffer(0); 
 	m_ListCtrl.SetItem(&lvi);
@@ -431,13 +434,13 @@ void stkSQLAppDlg::PopulateOffices()
 
 	auto offices = m_SQLConnector.QueryOffices();
 
-	m_ListCtrl.InsertColumn(ListContent::OFFICEID, _T("ID"), LVCFMT_LEFT, 100); 
-	m_ListCtrl.InsertColumn(ListContent::COUNTRY, _T("Country"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::CITY, _T("City"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::STREET, _T("Street"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::STREETNUM, _T("Street Num"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::HEADQUARTERS, _T("Headquarters?"), LVCFMT_LEFT, 100);
-	m_ListCtrl.InsertColumn(ListContent::OFKCOMPANYID, _T("Company ID"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsOffices::ID), _T("ID"), LVCFMT_LEFT, 100); 
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsOffices::COUNTRY), _T("Country"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsOffices::CITY), _T("City"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsOffices::STREET), _T("Street"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsOffices::STREETNUM), _T("Street Num"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsOffices::HEADQUARTERS), _T("Headquarters?"), LVCFMT_LEFT, 100);
+	m_ListCtrl.InsertColumn(to_underlying(ColumnsOffices::FKCOMPANYID), _T("Company ID"), LVCFMT_LEFT, 100);
 
 	int listIndex = 0;
 	for (auto office : offices) {
@@ -500,13 +503,13 @@ void stkSQLAppDlg::OnBnClickedButtonDel()
 	int ID = std::stoi(std::string(CStringA(idstr)));
 
 	switch (m_Showing) {
-	case ListContent::COMPANIES: {
+	case ListShowing::COMPANIES: {
 		m_SQLConnector.DelCompany(ID);
 	} break;
-	case ListContent::EMPLOYEES: {
+	case ListShowing::EMPLOYEES: {
 		m_SQLConnector.DelEmployee(ID);
 	} break;
-	case ListContent::OFFICES: {
+	case ListShowing::OFFICES: {
 		m_SQLConnector.DelOffice(ID);
 	} break;
 	default: break;
@@ -527,7 +530,7 @@ void stkSQLAppDlg::OnBnClickedButtonUpdate()
 	int ID = std::stoi(std::string(CStringA(idstr)));
 
 	switch (m_Showing) {
-		case ListContent::COMPANIES: {
+		case ListShowing::COMPANIES: {
 			Company company = m_SQLConnector.QueryCompany(ID);
 			
 			// Prepare strings by reading text fields. 
@@ -545,7 +548,7 @@ void stkSQLAppDlg::OnBnClickedButtonUpdate()
 
 			m_SQLConnector.UpdateCompany(company);
 		} break;
-		case ListContent::EMPLOYEES: {
+		case ListShowing::EMPLOYEES: {
 			Employee employee = m_SQLConnector.QueryEmployee(ID);
 
 			// Prepare strings by reading text fields. 
@@ -582,7 +585,7 @@ void stkSQLAppDlg::OnBnClickedButtonUpdate()
 			CString position;
 			m_EditEmployeePosition.GetWindowTextW(position);
 			if (!position.IsEmpty()) {
-				employee.position = (EmployeePos)std::stoi(std::string(CStringA(position)));
+				employee.position = (SQLDB::EmployeePos)std::stoi(std::string(CStringA(position)));
 			}
 
 			CString companyid;
@@ -605,7 +608,7 @@ void stkSQLAppDlg::OnBnClickedButtonUpdate()
 
 			m_SQLConnector.UpdateEmployee(employee);
 		} break;
-		case ListContent::OFFICES: {
+		case ListShowing::OFFICES: {
 			Office office = m_SQLConnector.QueryOffice(ID);
 
 			// Prepare strings by reading text fields. 

@@ -2,43 +2,46 @@
 #include "SQLClass.h"
 #include <string>
 
-namespace ListContent { 
-	enum ListContents {
-		NONE,
-		COMPANIES,
-		EMPLOYEES,
-		OFFICES
-	};
+typedef SQLDB::SQLClass DB;
+typedef SQLDB::Company Company;
+typedef SQLDB::Employee Employee;
+typedef SQLDB::Office Office;
 
-	enum ListColumnsCompanies {
-		COMPANYID,
-		NAME,
-		DATE
-	};
+enum class ListShowing {
+	NONE,
+	COMPANIES,
+	EMPLOYEES,
+	OFFICES
+};
 
-	enum ListColumnsEmployees {
-		EMPLOYEEID,
-		FIRSTNAME,
-		LASTNAME,
-		STARTINGDATE,
-		SALARY,
-		VACATIONDAYS,
-		POSITION,
-		EFKCOMPANYID,
-		EFKOFFICEID,
-		EFKBOSSID
-	};
+enum class ColumnsCompanies {
+	ID,
+	NAME,
+	DATE
+};
 
-	enum ListColumnsOffices {
-		OFFICEID,
-		COUNTRY,
-		CITY,
-		STREET,
-		STREETNUM,
-		HEADQUARTERS,
-		OFKCOMPANYID
-	};
-}
+enum class ColumnsEmployees {
+	ID,
+	FIRSTNAME,
+	LASTNAME,
+	STARTINGDATE,
+	SALARY,
+	VACATIONDAYS,
+	POSITION,
+	FKCOMPANYID,
+	FKOFFICEID,
+	FKBOSSID
+};
+
+enum class ColumnsOffices {
+	ID,
+	COUNTRY,
+	CITY,
+	STREET,
+	STREETNUM,
+	HEADQUARTERS,
+	FKCOMPANYID
+};
 
 // stkSQLAppDlg dialog
 class stkSQLAppDlg : public CDialogEx
@@ -72,9 +75,9 @@ private:
 	void ResetList();
 	void RePopulateList();
 
-	SQLClass m_SQLConnector; 
+	DB m_SQLConnector; 
 	CListCtrl m_ListCtrl;
-	ListContent::ListContents m_Showing;
+	ListShowing m_Showing;
 	
 	CEdit m_EditCompanyName;
 	CEdit m_EditCompanyDate;
